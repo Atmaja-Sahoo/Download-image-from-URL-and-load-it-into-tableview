@@ -12,9 +12,11 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var headerLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
+    var imageURLS:[String]!
     var activityView:UIActivityIndicatorView?
     override func viewDidLoad() {
         super.viewDidLoad()
+        imageURLS = ["https://homepages.cae.wisc.edu/~ece533/images/airplane.png","https://dummyimage.com/250/ffffff/000000","https://dummyimage.com/qvga","https://dummyimage.com/300/09f/fff.png","https://dummyimage.com/200x300&text=dummyimage.com+rocks!","https://dummyimage.com/skyscraper/f0f/f"]
          self.addSpinner()
         // Do any additional setup after loading the view, typically from a nib.
     }
@@ -36,7 +38,7 @@ class ViewController: UIViewController {
             activityView?.removeFromSuperview()
         }
     }
-
+    
     func getNewsImageForCell(urlString: String, cellForRowAtIndexPath indexPath: NSIndexPath,complitionHandler: @escaping (_ image:UIImage)-> Void) {
         var image: UIImage?
         DispatchQueue.main.async {
@@ -56,26 +58,34 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController:UITableViewDataSource {
+extension ViewController:UITableViewDataSource,UIScrollViewDelegate {
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        addSpinner()
+    }
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        removeSpinner()
+    }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return imageURLS.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as! ImageTableViewCell
         
-        let imgURL = "https://homepages.cae.wisc.edu/~ece533/images/airplane.png"
+        let imgURL = imageURLS[indexPath.row]
         
         if cell.displayImageView?.image == nil {
             cell.displayImageView?.image = UIImage()
            
             getNewsImageForCell(urlString: imgURL, cellForRowAtIndexPath: indexPath as NSIndexPath, complitionHandler: { image in
                 cell.displayImageView?.image = image
-                self.removeSpinner()
-                self.headerLabel.text = "Images are displayed"
+                 self.headerLabel.text = "Images are displayed"
+                 self.removeSpinner()
             })
         }
+       
+       
         
         return cell
     }

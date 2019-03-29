@@ -21,5 +21,9 @@ class ImageTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
+    override func prepareForReuse() {
+        // CELLS STILL FREEZE EVEN WHEN THE FOLLOWING LINE IS COMMENTED OUT?!?!
+        displayImageView.image = nil
+    }
 
 }

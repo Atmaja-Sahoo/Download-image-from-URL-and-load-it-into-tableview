@@ -14,6 +14,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     var imageURLS:[String]!
     var activityView:UIActivityIndicatorView?
+    var myQueue = DispatchQueue.global(qos: .userInteractive)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         imageURLS = ["https://homepages.cae.wisc.edu/~ece533/images/airplane.png","https://dummyimage.com/250/ffffff/000000","https://dummyimage.com/qvga","https://dummyimage.com/300/09f/fff.png","https://dummyimage.com/200x300&text=dummyimage.com+rocks!","https://dummyimage.com/skyscraper/f0f/f"]
@@ -41,20 +43,20 @@ class ViewController: UIViewController {
     
     func getNewsImageForCell(urlString: String, cellForRowAtIndexPath indexPath: NSIndexPath,complitionHandler: @escaping (_ image:UIImage)-> Void) {
         var image: UIImage?
-        DispatchQueue.main.async {
             do
             {
                 let url = URL(string: urlString)
-                let data = try? Data(contentsOf: url!)
-                if let imageData = data {
-                    image = UIImage(data:imageData,scale:1.0)
-                     complitionHandler(image!)
-                    
+                myQueue.async {
+                    let data = try? Data(contentsOf: url!)
+                    if let imageData = data {
+                        image = UIImage(data:imageData,scale:1.0)
+                        complitionHandler(image!)
+                        
+                    }
                 }
+               
               
             }
-            
-        }
     }
 }
 
@@ -79,14 +81,13 @@ extension ViewController:UITableViewDataSource,UIScrollViewDelegate {
             cell.displayImageView?.image = UIImage()
            
             getNewsImageForCell(urlString: imgURL, cellForRowAtIndexPath: indexPath as NSIndexPath, complitionHandler: { image in
-                cell.displayImageView?.image = image
-                 self.headerLabel.text = "Images are displayed"
-                 self.removeSpinner()
+                DispatchQueue.main.async {
+                    cell.displayImageView?.image = image
+                    self.headerLabel.text = "Images are displayed"
+                    self.removeSpinner()
+                }
             })
         }
-       
-       
-        
         return cell
     }
     
